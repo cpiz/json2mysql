@@ -1,4 +1,4 @@
-package com.cpiz.leanmysqlimporter
+package com.cpiz.json2mysql
 
 import com.alibaba.fastjson.JSONObject
 import java.sql.*

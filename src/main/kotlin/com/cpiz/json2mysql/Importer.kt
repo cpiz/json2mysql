@@ -1,4 +1,4 @@
-package com.cpiz.leanmysqlimporter
+package com.cpiz.json2mysql
 
 import org.kohsuke.args4j.CmdLineException
 import org.kohsuke.args4j.CmdLineParser
@@ -126,7 +126,7 @@ class Importer {
 
     fun printUsage() {
         // print the list of available options
-        System.err.println("LeanMysqlImporter [options...] arguments...")
+        System.err.println("json2mysql [options...] arguments...")
         parser.printUsage(System.err)
         System.err.println()
     }

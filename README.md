@@ -47,7 +47,7 @@ CREATE TABLE `mydb`.`usertable` (
 下载导出的数据文件，解压，执行下面的导入命令
 
 ```bat
-LeanMysqlImporter -u root -d mydb -t usertable -i AuthData emailVerified mobilePhoneVerified -b 2000 -f d:\MyDocs\Desktop\part-00000
+json2mysql -u root -d mydb -t usertable -i AuthData emailVerified mobilePhoneVerified -b 2000 -f d:\MyDocs\Desktop\part-00000
 ```
 
 执行结果
@@ -62,7 +62,7 @@ ________________________________________________________________________________
 参数介绍
 
 ```bat
-LeanMysqlImporter [options...] arguments...
+json2mysql [options...] arguments...
  -h VAL      : hostname (default: localhost)    # 数据库主机地址
  -P N        : port (default: 3306)             # 数据库连接端口
  -u VAL      : username (default: root)         # 数据库用户名

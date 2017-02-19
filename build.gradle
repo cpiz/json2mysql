@@ -32,4 +32,4 @@ dependencies {
 
 }
 
-mainClassName = 'com.cpiz.leanmysqlimporter.App'
+mainClassName = 'com.cpiz.json2mysql.App'
