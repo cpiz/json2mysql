@@ -9,6 +9,7 @@ import java.util.*
 /**
  * Created by caijw on 2017/2/18.
  *
+ * 导入器逻辑
  */
 class Importer {
     @Option(name = "-h", usage = "hostname")
@@ -49,61 +50,19 @@ class Importer {
             parser.parseArgument(x)
 
             when {
-                database.isNullOrBlank() -> throw CmdLineException(parser, "database is not given")
-                table.isNullOrBlank() -> throw CmdLineException(parser, "table is not given")
-                filePath.isNullOrBlank() -> throw CmdLineException(parser, "file is not given")
+                database.isNullOrBlank() -> throw CmdLineException(parser, "Error: database is not given")
+                table.isNullOrBlank() -> throw CmdLineException(parser, "Error: table is not given")
+                filePath.isNullOrBlank() -> throw CmdLineException(parser, "Error: file is not given")
             }
 
-            // 建立数据库连接
-            val model = DbModel()
-            model.host = host
-            model.port = port
-            model.username = username
-            model.password = password
-            model.database = database
-            model.table = table
-            model.ignores = ignores
-            model.open()
-
-//            model.printSchemaInfo()
-
-            // 解析文件
-            val dataModel = DataModel(filePath)
-            val lines = dataModel.getLineCount()
-            println("file line count: $lines")
-
-            // 插入数据
-            val beginTime = System.currentTimeMillis()
-            for (i in 1..100) {
-                print("_")
-                if (i == 100) {
-                    print("\n")
-                }
-            }
-
-            var currentNum = 0
-            var insertNum = 0
-            var percent = 1
-            dataModel.parseJsonObjects({ obj ->
-                if (model.insert(obj)) {
-                    insertNum++
-                }
-                currentNum++
-
-                if (currentNum * 100 / lines >= percent) {
-                    percent++
-                    print(">")
-                }
-
-                if (insertNum % batch == 0) {
-                    model.commit()
-                }
-            })
-            model.commit()
-            print("\n")
-            println("$currentNum rows processed, $insertNum inserted, cost ${System.currentTimeMillis() - beginTime}ms")
-            model.close()
-
+//        println("host: $host")
+//        println("port: $port")
+//        println("username: $username")
+//        println("password: $password")
+//        println("database: $database")
+//        println("filePath: $filePath")
+//        println("table: $table")
+//        println("ignores: $ignores")
         } catch (e: Exception) {
             // if there's a problem in the command line,
             // you'll get this exception. this will report
@@ -114,17 +73,62 @@ class Importer {
             return
         }
 
-//        println("host: $host")
-//        println("port: $port")
-//        println("username: $username")
-//        println("password: $password")
-//        println("database: $database")
-//        println("filePath: $filePath")
-//        println("table: $table")
-//        println("ignores: $ignores")
+        // 建立连接
+        val dbModel = DbModel()
+        dbModel.host = host
+        dbModel.port = port
+        dbModel.username = username
+        dbModel.password = password
+        dbModel.database = database
+        dbModel.table = table
+        dbModel.ignores = ignores
+        dbModel.open()
+//        dbModel.printSchemaInfo()
+
+        // 读取文件
+        val dataModel = DataModel(filePath)
+        val lines = dataModel.getLineCount()
+        println("data file line count: $lines")
+
+        // 进行导入
+        import(dataModel, lines, dbModel)
     }
 
-    fun printUsage() {
+    private fun import(dataModel: DataModel, lines: Int, model: DbModel) {
+        // 插入数据
+        val beginTime = System.currentTimeMillis()
+        for (i in 1..100) {
+            print("_")
+            if (i == 100) {
+                print("\n")
+            }
+        }
+
+        var currentNum = 0
+        var insertNum = 0
+        var percent = 1
+        dataModel.parseJsonObjects({ obj ->
+            if (model.insert(obj)) {
+                insertNum++
+            }
+            currentNum++
+
+            if (currentNum * 100 / lines >= percent) {
+                percent++
+                print(">")
+            }
+
+            if (insertNum % batch == 0) {
+                model.commit()
+            }
+        })
+        model.commit()
+        print("\n")
+        println("$currentNum rows processed, $insertNum inserted, cost ${System.currentTimeMillis() - beginTime}ms")
+        model.close()
+    }
+
+    private fun printUsage() {
         // print the list of available options
         System.err.println("json2mysql [options...] arguments...")
         parser.printUsage(System.err)

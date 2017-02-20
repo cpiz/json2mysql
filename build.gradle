@@ -13,7 +13,6 @@ buildscript {
 }
 
 apply plugin: 'application'
-apply plugin: 'java'
 apply plugin: 'kotlin'
 
 repositories {

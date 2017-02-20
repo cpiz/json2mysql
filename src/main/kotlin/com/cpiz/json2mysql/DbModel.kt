@@ -6,6 +6,7 @@ import java.sql.*
 /**
  * Created by caijw on 2017/2/18.
  *
+ * 数据库Model，用于数据库操作
  */
 class DbModel {
     var host: String = "localhost"
@@ -17,6 +18,9 @@ class DbModel {
     var conn: Connection? = null
     var ignores: List<String> = mutableListOf()
 
+    /**
+     * 打开数据库连接
+     */
     fun open(): Boolean {
         try {
             conn = DriverManager.getConnection(
@@ -41,13 +45,24 @@ class DbModel {
         }
     }
 
+    /**
+     * 关闭数据库
+     */
     fun close() {
         safeDo { conn?.close() }
     }
 
+    /**
+     * 插入数据
+     */
     fun insert(obj: JSONObject): Boolean {
+        if (conn == null || conn!!.isClosed) {
+            throw SQLException("Connect is closed")
+        }
+
         val keys = obj.keys.filterNot { ignores.any { s -> s.toUpperCase() == it.toUpperCase() } }
         if (keys.isEmpty()) {
+            System.err.println("No column to insert!")
             return false
         }
 
@@ -61,14 +76,28 @@ class DbModel {
             stmt.execute()
             return true
         } catch (e: SQLException) {
-            println(sql)
-            println(e.message)
-            throw e
+            System.err.println(sql)
+            for (i in 0..keys.size - 1) {
+                if (i != 0) {
+                    System.err.print(", ")
+                }
+                System.err.print("${keys[i]}: \"${obj.getString(keys[i])}\"")
+                if (i == keys.size - 1) {
+                    System.err.print('\n')
+                }
+            }
+            System.err.println(e.message)
+            System.err.println()
+
+            return false
         } finally {
             safeDo { stmt?.close() }
         }
     }
 
+    /**
+     * 提交事务
+     */
     fun commit() {
         conn?.commit()
     }
@@ -94,7 +123,7 @@ class DbModel {
                         ", CHARACTER_MAXIMUM_LENGTH: `${rs.getInt("CHARACTER_MAXIMUM_LENGTH")}`\n")
             }
         } catch (e: SQLException) {
-            println(e.message)
+            System.err.println(e.message)
         } finally {
             safeDo { rs?.close() }
             safeDo { stmt?.close() }

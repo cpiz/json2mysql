@@ -42,7 +42,7 @@ class DataModel(filePath: String) {
                 }
             } while (true)
         } catch (e: Exception) {
-            println("read file error, ${e.message}")
+            System.err.println("Task interrupted")
         } finally {
             safeDo { bufferedReader?.close() }
             safeDo { isReader?.close() }
