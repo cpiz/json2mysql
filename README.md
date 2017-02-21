@@ -1,14 +1,16 @@
-# LeanCloud to MySql 数据导入工具
+# Json to MySql 数据导入工具
 
 [LeanCloud](https://leancloud.cn/)是一个简单方便的后端云服务，使用它的云引擎与云存储很容易搭建APP的后端服务。
 
 但是它的云存储数据分析能力较弱，只能执行简单的HQL语句，执行效率也很低，如果能把数据导入到自己本地的MySql中就方便了。
 
-LeanCloud也提供了数据导出服务，但数据格式是多行的Json对象，非常不利于导入MySql这样的关系型数据库。
+LeanCloud也提供了数据导出服务，但数据格式是多行的Json对象，非常不利于导入Mysql这样的关系型数据库。
 
-求索不利后，我写了这个数据导入工具。
+求索不利后，我写了这个数据导入工具，**同时也能用于其他服务Json to Mysql的导入**。
 
 ## 构建
+
+使用Kotlin语言开发，用mysql-connector-java操作数据库
 
 ```bat
 gradlew installDist
