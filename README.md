@@ -1,4 +1,4 @@
-# Json to MySql 数据导入工具
+# json2mysql 数据导入工具
 
 [LeanCloud](https://leancloud.cn/)是一个简单方便的后端云服务，使用它的云引擎与云存储很容易搭建APP的后端服务。
 
