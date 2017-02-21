@@ -63,15 +63,20 @@ class DataModel(filePath: String) {
 
     fun parseJsonObjects(func: (JSONObject) -> Unit) {
         readLines { line ->
-            var obj: Any? = null
             try {
-                obj = JSON.parse(line)
-            } catch (e: Exception) {
-                println("parse error: $line")
-            }
+                val newLine = line.trim().trim(',')
+                val obj = JSON.parse(newLine)
+                if (newLine.isNullOrEmpty()) {
+                    return@readLines
+                }
 
-            if (obj is JSONObject) {
-                func(obj)
+                if (obj is JSONObject) {
+                    func(obj)
+                } else {
+                    throw Exception("is not json object")
+                }
+            } catch (e: Exception) {
+                System.err.println("parse `$line` error, ${e.message}")
             }
         }
     }
