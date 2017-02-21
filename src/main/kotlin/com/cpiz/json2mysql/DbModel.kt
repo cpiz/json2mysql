@@ -66,7 +66,9 @@ class DbModel {
             return false
         }
 
-        val sql = "insert into `$database`.`$table` (${keys.joinToString()}) values (${keys.joinToString(transform = { s -> "?" })})"
+        val sql = "insert into `$database`.`$table` (${keys.joinToString(transform = { s -> "`$s`" })})" +
+                " values " +
+                "(${keys.joinToString(transform = { s -> "?" })})"
         val stmt = conn!!.prepareStatement(sql)
         for (i in 0..keys.size - 1) {
             stmt.setString(i + 1, obj.getString(keys[i]))
@@ -86,7 +88,7 @@ class DbModel {
                     System.err.print('\n')
                 }
             }
-            System.err.println(e.message)
+            System.err.println("SQLException: ${e.message}")
             System.err.println()
 
             return false
