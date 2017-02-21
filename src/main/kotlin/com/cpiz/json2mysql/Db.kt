@@ -8,13 +8,12 @@ import java.sql.*
  *
  * 数据库Model，用于数据库操作
  */
-class DbModel {
+class Db {
     var host: String = "localhost"
     var port: Int = 3306
     var username: String = "root"
     var password: String = ""
     var database: String = ""
-    var table: String = ""
     var conn: Connection? = null
     var ignores: List<String> = mutableListOf()
 
@@ -53,17 +52,18 @@ class DbModel {
     }
 
     /**
-     * 插入数据
+     * 插入数据库
+     *
+     * 注意处理异常
      */
-    fun insert(obj: JSONObject): Boolean {
+    fun insert(obj: JSONObject, table: String) {
         if (conn == null || conn!!.isClosed) {
             throw SQLException("Connect is closed")
         }
 
         val keys = obj.keys.filterNot { ignores.any { s -> s.toUpperCase() == it.toUpperCase() } }
         if (keys.isEmpty()) {
-            System.err.println("No column to insert!")
-            return false
+            throw Exception("No column to insert!")
         }
 
         val sql = "insert into `$database`.`$table` (${keys.joinToString(transform = { s -> "`$s`" })})" +
@@ -76,22 +76,20 @@ class DbModel {
 
         try {
             stmt.execute()
-            return true
         } catch (e: SQLException) {
-            System.err.println(sql)
+            val sb = StringBuilder(sql).append("\n")
             for (i in 0..keys.size - 1) {
                 if (i != 0) {
-                    System.err.print(", ")
+                    sb.append(", ")
                 }
-                System.err.print("${keys[i]}: \"${obj.getString(keys[i])}\"")
+                sb.append("${keys[i]}: \"${obj.getString(keys[i])}\"")
                 if (i == keys.size - 1) {
-                    System.err.print('\n')
+                    sb.append("\n")
                 }
             }
-            System.err.println("SQLException: ${e.message}")
-            System.err.println()
+            sb.append("SQLException: ${e.message}")
 
-            return false
+            throw Exception(sb.toString())
         } finally {
             safeDo { stmt?.close() }
         }
@@ -104,7 +102,26 @@ class DbModel {
         conn?.commit()
     }
 
-    fun printSchemaInfo() {
+    /**
+     * 清空表数据
+     */
+    fun truncateTable(table: String) {
+        var stmt: Statement? = null
+        try {
+            stmt = conn!!.createStatement()
+            val sql = "TRUNCATE TABLE `$database`.`$table`"
+            stmt.execute(sql)
+        } catch (e: SQLException) {
+            throw Exception(e.message)
+        } finally {
+            safeDo { stmt?.close() }
+        }
+    }
+
+    /**
+     * 打印指定表的数据结构
+     */
+    fun printSchemaInfo(table: String) {
         var stmt: Statement? = null
         var rs: ResultSet? = null
         try {
@@ -125,7 +142,7 @@ class DbModel {
                         ", CHARACTER_MAXIMUM_LENGTH: `${rs.getInt("CHARACTER_MAXIMUM_LENGTH")}`\n")
             }
         } catch (e: SQLException) {
-            System.err.println(e.message)
+            throw Exception(e.message)
         } finally {
             safeDo { rs?.close() }
             safeDo { stmt?.close() }
