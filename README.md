@@ -78,5 +78,4 @@ json2mysql [options...] arguments...
 
 ## 其他
 
-* 有一条数据插入失败时整个任务将取消，请修复问题后清除MySql表中数据再重新执行
 * 目前暂未支持字段的内容转换，大多数字段可用VARCHAR、INT支持
